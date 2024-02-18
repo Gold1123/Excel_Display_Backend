@@ -11,3 +11,10 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
+def clear_database():
+    # Use the Base metadata to drop all 
+    print("clear database")
+    Base.metadata.drop_all(bind=engine)
+
+    # Optionally, you can also recreate the tables after dropping them
+    Base.metadata.create_all(bind=engine)

@@ -7,12 +7,14 @@ import os
 import schemas
 from sqlalchemy.orm import Session
 from app.Models import models
+from database import clear_database
 from typing import List
 
 router = APIRouter()
 
 @router.post("/display-table")
 async def display_table(file: UploadFile = Form(...), db: Session = Depends(models.get_db)):
+    clear_database()
     directory = "./data"
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -21,7 +23,8 @@ async def display_table(file: UploadFile = Form(...), db: Session = Depends(mode
     
     with open(f"data/{file.filename}", 'rb') as f:
         result = chardet.detect(f.read())  # or readline if the file is large
-        
+    
+    
         
     # ------------------------------- Create Company ------------------------------
     review = pd.read_excel(f"data/{file.filename}", sheet_name="Main table")
