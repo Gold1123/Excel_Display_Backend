@@ -28,6 +28,12 @@ class IntellectualPropertyBase(BaseModel):
     type_of_agreement: Optional[str] = None
     licensee_organization: Optional[str] = None
     academic_licensor: Optional[str] = None
+    Equity_in_the_License_Agreement: Optional[str] = None
+    Direct_equity_to_inventor_academia: Optional[str] = None
+    Direct_equity_to_Inventor_operator: Optional[str] = None
+    Direcct_academic_institution_equity: Optional[str] = None
+    
+    
 
 class IntellectualPropertyCreate(IntellectualPropertyBase):
     owner_id: Optional[int]

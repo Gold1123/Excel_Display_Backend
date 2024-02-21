@@ -54,6 +54,12 @@ class Intellectual_property(Base):
     type_of_agreement = Column(String, index=True)
     licensee_organization = Column(String, index=True)
     academic_licensor = Column(String, index=True)
+    Equity_in_the_License_Agreement = Column(String, index = True)
+    Direct_equity_to_inventor_academia = Column(String, index = True)
+    Direct_equity_to_Inventor_operator = Column(String, index = True)
+    Direcct_academic_institution_equity = Column(String, index = True)
+    
+    
     owner_id = Column(Integer, ForeignKey("mains.id"))
     
     owner = relationship("Main", back_populates="intellectual_properties")
