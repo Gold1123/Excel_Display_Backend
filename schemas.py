@@ -25,6 +25,7 @@ class Human(HumanCreate):
 
 class IntellectualPropertyBase(BaseModel):
     licensor_organization: Optional[str] = None
+    type_of_licensor_organization: Optional[str] = None
     type_of_agreement: Optional[str] = None
     licensee_organization: Optional[str] = None
     academic_licensor: Optional[str] = None

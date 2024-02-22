@@ -14,7 +14,7 @@ router = APIRouter()
 
 @router.post("/display-table")
 async def display_table(file: UploadFile = Form(...), db: Session = Depends(models.get_db)):
-    clear_database()
+    # clear_database()
     directory = "./data"
     if not os.path.exists(directory):
         os.makedirs(directory)
@@ -49,10 +49,19 @@ async def display_table(file: UploadFile = Form(...), db: Session = Depends(mode
             continue
         db_main = models.get_main_by_name(db, list_company_name[i])
         # print(db_main.company_name, " - ", list_company_name[i])
-        if not db_main:
-            # print(db_main.company_name)
-            print(models.create_main(db, schemas.MainCreate(**main_dict)))
-    
+        if db_main:
+            print("start")
+            for human in db_main.humans:
+                models.delete_human(db, human)
+                print(human.company_name)
+                
+            for intellectual_property in db_main.intellectual_properties:
+                models.delete_intellectualProperty(db, intellectual_property)
+                print(intellectual_property.licensee_organization)
+            models.delete_main(db, db_main)
+        
+        print(models.create_main(db, schemas.MainCreate(**main_dict)))
+    # return
     # ------------------------------- Create Human ------------------------------
     
     review = pd.read_excel(f"data/{file.filename}", sheet_name="Human")

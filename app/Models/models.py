@@ -51,6 +51,7 @@ class Intellectual_property(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     licensor_organization = Column(String, index=True)
+    type_of_licensor_organization = Column(String, index = True)
     type_of_agreement = Column(String, index=True)
     licensee_organization = Column(String, index=True)
     academic_licensor = Column(String, index=True)
