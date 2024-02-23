@@ -23,9 +23,10 @@ class Main(Base):
     id = Column(Integer, primary_key=True, index=True)
     company_name = Column(String, index=True)
     IPO_year = Column(Integer, index=True)
-    # Address
     primary_business = Column(String)
     pre_IPO = Column(String)
+    non_founder_ceo_equity = Column(Float)
+    total_founder_equity = Column(Float)
     
     humans = relationship("Human", back_populates="owner")
     intellectual_properties = relationship("Intellectual_property", back_populates="owner")
@@ -40,7 +41,7 @@ class Human(Base):
     company_name = Column(String)
     founder_organization = Column(String)
     type_of_org = Column(String)
-    equity = Column(String)
+    equity = Column(Float)
     
     owner_id = Column(Integer, ForeignKey("mains.id"))
     
@@ -55,10 +56,10 @@ class Intellectual_property(Base):
     type_of_agreement = Column(String, index=True)
     licensee_organization = Column(String, index=True)
     academic_licensor = Column(String, index=True)
-    Equity_in_the_License_Agreement = Column(String, index = True)
-    Direct_equity_to_inventor_academia = Column(String, index = True)
-    Direct_equity_to_Inventor_operator = Column(String, index = True)
-    Direcct_academic_institution_equity = Column(String, index = True)
+    equity_in_the_License_Agreement = Column(String, index = True)
+    direct_equity_to_inventor_academia = Column(Float, index = True)
+    direct_equity_to_Inventor_operator = Column(Float, index = True)
+    direct_academic_institution_equity = Column(Float, index = True)
     
     
     owner_id = Column(Integer, ForeignKey("mains.id"))
@@ -73,7 +74,6 @@ def get_main_by_name(db: Session, name: str):
     return db.query(Main).filter(Main.company_name == name).first()
 
 def get_main_by_id(db: Session, id: int):
-    print(id)
     return db.query(Main).filter(Main.id == id).first()
 
 def get_mains(db: Session, skip: int = 0, limit: int = limit):
@@ -128,7 +128,6 @@ def update_human(db: Session, db_human: Main, human_in: schemas.MainCreate):
 
 
 def get_human_by_id(db: Session, id: int):
-    print(id)
     return db.query(Human).filter(Human.id == id).first()
 
 def delete_human(db: Session, db_human: Human):

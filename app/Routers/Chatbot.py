@@ -9,11 +9,14 @@ from sqlalchemy.orm import Session
 from app.Models import models
 from database import clear_database
 from typing import List
+import numpy as np
+
 
 router = APIRouter()
+    
 
 @router.post("/display-table")
-async def display_table(file: UploadFile = Form(...), db: Session = Depends(models.get_db)):
+async def display_table(file: UploadFile = Form(...),           db: Session = Depends(models.get_db)):
     # clear_database()
     directory = "./data"
     if not os.path.exists(directory):
@@ -29,6 +32,7 @@ async def display_table(file: UploadFile = Form(...), db: Session = Depends(mode
     # ------------------------------- Create Company ------------------------------
     review = pd.read_excel(f"data/{file.filename}", sheet_name="Main table")
     review = review.replace([pd.NaT, pd.NA, float('nan'), float('inf'), float('-inf')], None)
+    
     data_dict = {col: review[col].tolist() for col in review.columns}
     
     list_company_name = data_dict["Company Name"]
@@ -44,28 +48,24 @@ async def display_table(file: UploadFile = Form(...), db: Session = Depends(mode
             "primary_business": list_primary_business[i],
             "pre_IPO": str(list_pre_IPO[i])
         }
-        print(type(main_dict["pre_IPO"]))
         if list_company_name[i] == None:
             continue
         db_main = models.get_main_by_name(db, list_company_name[i])
-        # print(db_main.company_name, " - ", list_company_name[i])
         if db_main:
-            print("start")
             for human in db_main.humans:
                 models.delete_human(db, human)
-                print(human.company_name)
                 
             for intellectual_property in db_main.intellectual_properties:
                 models.delete_intellectualProperty(db, intellectual_property)
-                print(intellectual_property.licensee_organization)
             models.delete_main(db, db_main)
         
         print(models.create_main(db, schemas.MainCreate(**main_dict)))
-    # return
+    
     # ------------------------------- Create Human ------------------------------
     
     review = pd.read_excel(f"data/{file.filename}", sheet_name="Human")
     review = review.replace([pd.NaT, pd.NA, float('nan'), float('inf'), float('-inf')], None)
+    review['Founder equity at IPO (%)'] = review['Founder equity at IPO (%)'].apply(lambda x: x if isinstance(x, float) else None).replace({np.nan: None})
     data_dict = {col: review[col].tolist() for col in review.columns}
     
     list_name = data_dict["Name of a person"]
@@ -89,9 +89,23 @@ async def display_table(file: UploadFile = Form(...), db: Session = Depends(mode
                 "company_name": list_company_name[i],
                 "founder_organization": list_founder_organization[i],
                 "type_of_org": list_type_of_org[i],
-                "equity": str(list_equity[i]),
+                "equity": list_equity[i],
                 "owner_id": db_main.id
             }
+            if list_equity[i] and list_founder_role[i]:
+                db_main_updated = db_main
+                
+                print("--start--")
+                print(db_main_updated.non_founder_ceo_equity, " " , list_equity[i])
+                if list_founder_role[i].lower().strip() == "no":
+                    equity = db_main.non_founder_ceo_equity
+                    db_main_updated.non_founder_ceo_equity = (equity if equity else 0) + list_equity[i]
+                else:
+                    equity = db_main.total_founder_equity
+                    db_main_updated.total_founder_equity = (equity if equity else 0) + list_equity[i]
+                
+                print("--end--")
+                models.update_main(db, db_main, schemas.MainCreate.from_orm(db_main_updated))
             models.create_human(db, schemas.HumanCreate(**human_dict))
             
     # --------------------- create_intellectualProperty ------------------------
@@ -101,25 +115,35 @@ async def display_table(file: UploadFile = Form(...), db: Session = Depends(mode
     data_dict = {col: review[col].tolist() for col in review.columns}
     
     list_licensor_organization = data_dict["Licensor (seller) organization"]
+    list_type_of_licensor_organization = data_dict["Type of Licensor Organization"]
+    
     list_type_of_agreement = data_dict["Type of Agreement"]
     list_licensee_organization  = data_dict["Organization"]
     list_academic_licensor = data_dict["Academic Licensor (Yes/ No)"]
-    length = min(len(list_licensor_organization), len(list_type_of_agreement), len(list_licensee_organization), len(list_academic_licensor))
+    list_equity_in_the_License_Agreement = data_dict["Equity in the License Agreement"]
+    list_direct_equity_to_inventor_academia = data_dict["Direct equity to inventor academia (%)"]
+    list_direct_equity_to_Inventor_operator = data_dict["Direct equity to inventor operator (%)"]
+    list_direct_academic_institution_equity = data_dict["Direct academic institution equity (%)"]
+    length = len(list_licensor_organization)
+    # length = min(len(list_licensor_organization), len(list_type_of_agreement), len(list_licensee_organization), len(list_academic_licensor))
     
     for i in range(0, length):
         if list_licensee_organization[i] == None:
             continue
         db_main = models.get_main_by_name(db, list_licensee_organization[i])
         if db_main:
-            # print(db_main.id, " ", db_main.company_name, " ", list_licensee_organization[i])
             intellectualProperty_dict = {
                 "licensor_organization": list_licensor_organization[i],
+                "type_of_licensor_organization": list_type_of_licensor_organization[i],
                 "type_of_agreement": list_type_of_agreement[i],
                 "licensee_organization": list_licensee_organization[i],
                 "academic_licensor": list_academic_licensor[i],
+                "equity_in_the_License_Agreement": list_equity_in_the_License_Agreement[i],
+                "direct_equity_to_inventor_academia": list_direct_equity_to_inventor_academia[i],
+                "direct_equity_to_Inventor_operator": list_direct_equity_to_Inventor_operator[i],
+                "direct_academic_institution_equity": list_direct_academic_institution_equity[i],
                 "owner_id": db_main.id
             }
-            # print(intellectualProperty_dict)
             models.create_intellectualProperty(db, schemas.IntellectualPropertyCreate(**intellectualProperty_dict))
     return True
 

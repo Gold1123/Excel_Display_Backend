@@ -11,7 +11,7 @@ class HumanBase(BaseModel):
     company_name: Optional[str] = None
     founder_organization: Optional[str] = None
     type_of_org: Optional[str] = None
-    equity: Optional[str] = None
+    equity: Optional[float] = None
     
     
 class HumanCreate(HumanBase):
@@ -29,10 +29,10 @@ class IntellectualPropertyBase(BaseModel):
     type_of_agreement: Optional[str] = None
     licensee_organization: Optional[str] = None
     academic_licensor: Optional[str] = None
-    Equity_in_the_License_Agreement: Optional[str] = None
-    Direct_equity_to_inventor_academia: Optional[str] = None
-    Direct_equity_to_Inventor_operator: Optional[str] = None
-    Direcct_academic_institution_equity: Optional[str] = None
+    equity_in_the_License_Agreement: Optional[str] = None
+    direct_equity_to_inventor_academia: Optional[float] = None
+    direct_equity_to_Inventor_operator: Optional[float] = None
+    direct_academic_institution_equity: Optional[float] = None
     
     
 
@@ -50,10 +50,19 @@ class MainBase(BaseModel):
     IPO_year: Optional[int] = None
     primary_business: Optional[str] = None
     pre_IPO: Optional[str] = None
+    non_founder_ceo_equity: Optional[float] = None
+    total_founder_equity: Optional[float] = None
+    
+    class Config:
+        orm_mode = True
+        from_attributes = True
     
     
 class MainCreate(MainBase):
     pass
+    class Config:
+        orm_mode = True
+        from_attributes = True
 
 class Main(MainBase):
     id: int
@@ -62,4 +71,4 @@ class Main(MainBase):
 
     class Config:
         orm_mode = True
-        from_attributes=True
+        from_attributes = True
