@@ -13,10 +13,31 @@ import numpy as np
 
 
 router = APIRouter()
+
+def update_founder_equity(db, db_main, equity, founder_role, founder):
+    db_main_updated = db_main
+    if db_main.company_name == "Accelus":
+        print(founder_role)
+    if(founder_role == 'No'):
+        print(founder_role.lower().strip())
+    # print("--start--")
+    # print(db_main_updated.non_founder_ceo_equity, " " , equity)
+    if founder.lower().strip() == "no" and founder_role.lower().strip() == "ceo":
+        main_equity = db_main.non_founder_ceo_equity
+        db_main_updated.non_founder_ceo_equity = (main_equity if main_equity else 0) + equity
+        print("db_main_updated.non_founder_ceo_equity", db_main_updated.non_founder_ceo_equity)
+    elif founder.lower().strip() == "yes":
+        print("founder", founder)
+        main_equity = db_main.total_founder_equity
+        db_main_updated.total_founder_equity = (main_equity if main_equity else 0) + equity
     
+    # print("--end--")
+    return models.update_main(db, db_main, schemas.MainCreate.from_orm(db_main_updated))
+
+
 
 @router.post("/display-table")
-async def display_table(file: UploadFile = Form(...),           db: Session = Depends(models.get_db)):
+async def display_table(file: UploadFile = Form(...), db: Session = Depends(models.get_db)):
     # clear_database()
     directory = "./data"
     if not os.path.exists(directory):
@@ -92,20 +113,7 @@ async def display_table(file: UploadFile = Form(...),           db: Session = De
                 "equity": list_equity[i],
                 "owner_id": db_main.id
             }
-            if list_equity[i] and list_founder_role[i]:
-                db_main_updated = db_main
                 
-                print("--start--")
-                print(db_main_updated.non_founder_ceo_equity, " " , list_equity[i])
-                if list_founder_role[i].lower().strip() == "no":
-                    equity = db_main.non_founder_ceo_equity
-                    db_main_updated.non_founder_ceo_equity = (equity if equity else 0) + list_equity[i]
-                else:
-                    equity = db_main.total_founder_equity
-                    db_main_updated.total_founder_equity = (equity if equity else 0) + list_equity[i]
-                
-                print("--end--")
-                models.update_main(db, db_main, schemas.MainCreate.from_orm(db_main_updated))
             models.create_human(db, schemas.HumanCreate(**human_dict))
             
     # --------------------- create_intellectualProperty ------------------------
@@ -161,7 +169,16 @@ def create_main(main: schemas.MainCreate, db: Session = Depends(models.get_db)):
 @router.get("/company", response_model=List[schemas.Main])
 def read_mains(db: Session = Depends(models.get_db)):
     mains = models.get_mains(db)
+    for main in mains:
+        main.non_founder_ceo_equity = 0
+        main.total_founder_equity = 0
+        for human in main.humans:
+            if human.equity and human.founder_role and human.founder:
+                update_founder_equity(db, main, human.equity, human.founder_role, human.founder)
+            
+            
     sorted_mains = sorted(mains, key=lambda x: x.id)
+    
     return sorted_mains
 
 @router.put("/company/{id}", response_model=schemas.Main)
@@ -203,7 +220,7 @@ def update_human(id: int, human: schemas.HumanCreate, db: Session = Depends(mode
     print(human)
     db_human = models.get_human_by_id(db, id)
     if db_human is None:
-        raise HTTPException(status_code=404, detail="Human not found")
+        raise HTTPException(status_code=404, detail="Human not found")    
     return models.update_human(db, db_human, human)
 
 @router.delete("/human/{id}")
