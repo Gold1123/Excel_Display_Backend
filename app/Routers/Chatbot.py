@@ -152,6 +152,7 @@ async def display_table(file: UploadFile = Form(...), db: Session = Depends(mode
                 "direct_academic_institution_equity": list_direct_academic_institution_equity[i],
                 "owner_id": db_main.id
             }
+            print("intel: ", intellectualProperty_dict)
             models.create_intellectualProperty(db, schemas.IntellectualPropertyCreate(**intellectualProperty_dict))
     return True
 
