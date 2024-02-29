@@ -60,7 +60,7 @@ class Intellectual_property(Base):
     direct_equity_to_inventor_academia = Column(Float, index = True)
     direct_equity_to_Inventor_operator = Column(Float, index = True)
     direct_academic_institution_equity = Column(Float, index = True)
-    
+    contract_doc = Column(String, index=True)
     
     owner_id = Column(Integer, ForeignKey("mains.id"))
     

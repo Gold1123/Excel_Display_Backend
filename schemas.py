@@ -33,8 +33,7 @@ class IntellectualPropertyBase(BaseModel):
     direct_equity_to_inventor_academia: Optional[float] = None
     direct_equity_to_Inventor_operator: Optional[float] = None
     direct_academic_institution_equity: Optional[float] = None
-    
-    
+    contract_doc: Optional[str] = None
 
 class IntellectualPropertyCreate(IntellectualPropertyBase):
     owner_id: Optional[int]

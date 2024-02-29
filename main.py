@@ -22,7 +22,7 @@ app.add_middleware(
 app.include_router(Chatbot.router, tags=["Chatbot"], prefix="/api/v1")
 
 app.mount("/upload", StaticFiles(directory="./upload"), name="upload")
-
+ 
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
