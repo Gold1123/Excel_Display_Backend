@@ -265,3 +265,12 @@ def delete_intellectualProperty(id: int, db: Session = Depends(models.get_db)):
         raise HTTPException(status_code=404, detail="Main not found")
     print(models.delete_intellectualProperty(db, db_intellectualProperty))
     return True
+
+@router.post("/contract-doc")
+def upload_contract_doc(file: UploadFile = Form(...)):
+    directory = "./upload"
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    with open(f"{directory}/{file.filename}", "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+    print("hhh")
