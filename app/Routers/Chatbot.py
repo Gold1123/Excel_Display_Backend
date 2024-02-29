@@ -39,14 +39,14 @@ def update_founder_equity(db, db_main, equity, founder_role, founder):
 @router.post("/display-table")
 async def display_table(file: UploadFile = Form(...), db: Session = Depends(models.get_db)):
     # clear_database()
-    directory = "./data"
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    with open(f"{directory}/{file.filename}", "wb") as buffer:
-        shutil.copyfileobj(file.file, buffer)
+    # directory = "./data"
+    # if not os.path.exists(directory):
+    #     os.makedirs(directory)
+    # with open(f"{directory}/{file.filename}", "wb") as buffer:
+    #     shutil.copyfileobj(file.file, buffer)
     
-    with open(f"data/{file.filename}", 'rb') as f:
-        result = chardet.detect(f.read())  # or readline if the file is large
+    # with open(f"data/{file.filename}", 'rb') as f:
+    #     result = chardet.detect(f.read())  # or readline if the file is large
     
     
         
