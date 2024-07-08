@@ -11,7 +11,6 @@ from database import clear_database
 from typing import List
 import numpy as np
 
-
 router = APIRouter()
 
 def update_founder_equity(db, db_main, equity, founder_role, founder):
